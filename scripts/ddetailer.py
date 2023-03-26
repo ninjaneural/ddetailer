@@ -222,6 +222,7 @@ class DetectionDetailerScript(scripts.Script):
                 print(f"Processing initial image for output generation {n + 1}.")
                 p_txt.seed = start_seed
                 processed = processing.process_images(p_txt)
+                changed_prompt = p_txt.all_prompts[0]                
                 init_image = processed.images[0]   
             else: 
                 init_image = orig_image
@@ -313,7 +314,14 @@ class DetectionDetailerScript(scripts.Script):
                         if ( opts.dd_save_masks):
                             images.save_image(masks_a[i], opts.outdir_ddetailer_masks, "", start_seed, p.prompt, opts.samples_format, p=p)
                         
-                        processed = processing.process_images(p)
+                        if is_txt2img:
+                          p.prompt = changed_prompt
+                          processed = processing.process_images(p)
+                          p.prompt = p_txt.prompt
+                          initial_info = processed.info
+                        else:
+                          processed = processing.process_images(p)
+                        
                         if initial_info is None:
                             initial_info = processed.info
                         p.seed = processed.seed + 1
