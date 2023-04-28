@@ -54,9 +54,15 @@ def startup():
         bbox_path = os.path.join(dd_models_path, "bbox")
         segm_path = os.path.join(dd_models_path, "segm")
         load_file_from_url("https://huggingface.co/dustysys/ddetailer/resolve/main/mmdet/bbox/mmdet_anime-face_yolov3.pth", bbox_path)
-        load_file_from_url("https://huggingface.co/dustysys/ddetailer/raw/main/mmdet/bbox/mmdet_anime-face_yolov3.py", bbox_path)
+        #load_file_from_url("https://huggingface.co/dustysys/ddetailer/raw/main/mmdet/bbox/mmdet_anime-face_yolov3.py", bbox_path)
         load_file_from_url("https://huggingface.co/dustysys/ddetailer/resolve/main/mmdet/segm/mmdet_dd-person_mask2former.pth", segm_path)
-        load_file_from_url("https://huggingface.co/dustysys/ddetailer/raw/main/mmdet/segm/mmdet_dd-person_mask2former.py", segm_path)
+        #load_file_from_url("https://huggingface.co/dustysys/ddetailer/raw/main/mmdet/segm/mmdet_dd-person_mask2former.py", segm_path)
+
+        load_file_from_url("https://github.com/ninjaneural/ddetailer/raw/master/misc/face/mmdet_anime-face_yolov3.py", segm_path)
+        load_file_from_url("https://github.com/ninjaneural/ddetailer/raw/master/misc/person/default_runtime.py", segm_path)
+        load_file_from_url("https://github.com/ninjaneural/ddetailer/raw/master/misc/person/coco_panoptic.py", segm_path)
+        load_file_from_url("https://github.com/ninjaneural/ddetailer/raw/master/misc/person/mask2former_r50_8xb2-lsj-50e_coco-panoptic.py", segm_path)
+        load_file_from_url("https://github.com/ninjaneural/ddetailer/raw/master/misc/person/mmdet_dd-person_mask2former.py", segm_path)
 
 startup()
 
@@ -365,6 +371,7 @@ def create_segmask_preview(results, image):
     labels = results[0]
     bboxes = results[1]
     segms = results[2]
+    scores = results[3]
 
     cv2_image = np.array(image)
     cv2_image = cv2_image[:, :, ::-1].copy()
@@ -382,7 +389,7 @@ def create_segmask_preview(results, image):
         cv2_image = np.where(cv2_mask_rgb == 255, color_image, cv2_image)
         text_color = tuple([int(x) for x in ( color[0][0] - 100 )])
         name = labels[i]
-        score = bboxes[i][4]
+        score = scores[i]
         score = str(score)[:4]
         text = name + ":" + score
         cv2.putText(cv2_image, text, (centroid_x - 30, centroid_y), cv2.FONT_HERSHEY_DUPLEX, 0.4, text_color, 1, cv2.LINE_AA)
@@ -491,26 +498,30 @@ def inference_mmdet_segm(image, modelname, conf_thres, label):
     model_config = os.path.splitext(model_checkpoint)[0] + ".py"
     model_device = get_device()
     model = init_detector(model_config, model_checkpoint, device=model_device)
-    mmdet_results = inference_detector(model, np.array(image))
-    bbox_results, segm_results = mmdet_results
+    results = inference_detector(model, np.array(image))
+
     dataset = modeldataset(modelname)
     classes = get_classes(dataset)
-    labels = [
-        np.full(bbox.shape[0], i, dtype=np.int32)
-        for i, bbox in enumerate(bbox_results)
-    ]
-    n,m = bbox_results[0].shape
+
+    n,m = results.pred_instances.bboxes.shape
     if (n == 0):
-        return [[],[],[]]
-    labels = np.concatenate(labels)
-    bboxes = np.vstack(bbox_results)
-    segms = mmcv.concat_list(segm_results)
+        return [[],[],[],[]]
+    bboxes = np.vstack(results.pred_instances.bboxes)
+    segms1 = np.vstack(results.pred_instances.masks)
+    segms = results.pred_instances.masks.numpy()
+    scores = results.pred_instances.scores.numpy()
+    labels = results.pred_instances.labels.numpy()
+
+    print(segms1)
+    print(segms)
+
     filter_inds = np.where(bboxes[:,-1] > conf_thres)[0]
-    results = [[],[],[]]
+    results = [[],[],[],[]]
     for i in filter_inds:
         results[0].append(label + "-" + classes[labels[i]])
         results[1].append(bboxes[i])
         results[2].append(segms[i])
+        results[3].append(scores[i])
 
     return results
 
@@ -520,27 +531,32 @@ def inference_mmdet_bbox(image, modelname, conf_thres, label):
     model_device = get_device()
     model = init_detector(model_config, model_checkpoint, device=model_device)
     results = inference_detector(model, np.array(image))
+
     cv2_image = np.array(image)
     cv2_image = cv2_image[:, :, ::-1].copy()
     cv2_gray = cv2.cvtColor(cv2_image, cv2.COLOR_BGR2GRAY)
 
     segms = []
-    for (x0, y0, x1, y1, conf) in results[0]:
+    for (x0, y0, x1, y1) in results.pred_instances.bboxes:
         cv2_mask = np.zeros((cv2_gray.shape), np.uint8)
         cv2.rectangle(cv2_mask, (int(x0), int(y0)), (int(x1), int(y1)), 255, -1)
         cv2_mask_bool = cv2_mask.astype(bool)
         segms.append(cv2_mask_bool)
     
-    n,m = results[0].shape
+    n,m = results.pred_instances.bboxes.shape
     if (n == 0):
-        return [[],[],[]]
-    bboxes = np.vstack(results[0])
+        return [[],[],[],[]]
+    bboxes = np.vstack(results.pred_instances.bboxes)
+    scores = np.vstack(results.pred_instances.scores)
     filter_inds = np.where(bboxes[:,-1] > conf_thres)[0]
-    results = [[],[],[]]
+    results = [[],[],[],[]]
     for i in filter_inds:
         results[0].append(label)
         results[1].append(bboxes[i])
         results[2].append(segms[i])
+        results[3].append(scores[i])
+
+    print(results)
 
     return results
 
