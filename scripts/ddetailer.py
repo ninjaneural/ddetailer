@@ -71,15 +71,15 @@ def startup():
         # load_file_from_url("https://huggingface.co/dustysys/ddetailer/raw/main/mmdet/segm/mmdet_dd-person_mask2former.py", segm_path)
 
         load_file_from_url(
-            "https://github.com/ninjaneural/ddetailer/raw/master/misc/face/mmdet_anime-face_yolov3.py", segm_path)
+            "https://raw.githubusercontent.com/ninjaneural/ddetailer/mmdet3/misc/face/mmdet_anime-face_yolov3.py", segm_path)
         load_file_from_url(
-            "https://github.com/ninjaneural/ddetailer/raw/master/misc/person/default_runtime.py", segm_path)
+            "https://raw.githubusercontent.com/ninjaneural/ddetailer/mmdet3/misc/person/default_runtime.py", segm_path)
         load_file_from_url(
-            "https://github.com/ninjaneural/ddetailer/raw/master/misc/person/coco_panoptic.py", segm_path)
+            "https://raw.githubusercontent.com/ninjaneural/ddetailer/mmdet3/misc/misc/person/coco_panoptic.py", segm_path)
         load_file_from_url(
-            "https://github.com/ninjaneural/ddetailer/raw/master/misc/person/mask2former_r50_8xb2-lsj-50e_coco-panoptic.py", segm_path)
+            "https://raw.githubusercontent.com/ninjaneural/ddetailer/mmdet3/misc/person/mask2former_r50_8xb2-lsj-50e_coco-panoptic.py", segm_path)
         load_file_from_url(
-            "https://github.com/ninjaneural/ddetailer/raw/master/misc/person/mmdet_dd-person_mask2former.py", segm_path)
+            "https://raw.githubusercontent.com/ninjaneural/ddetailer/mmdet3/misc/person/mmdet_dd-person_mask2former.py", segm_path)
 
 
 startup()
