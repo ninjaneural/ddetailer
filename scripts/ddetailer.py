@@ -590,11 +590,6 @@ def inference_mmdet_segm(image, modelname, conf_thres, label):
     scores = results.pred_instances.scores.numpy()
     labels = results.pred_instances.labels.numpy()
 
-    print(bboxes)
-    print(segms)
-    print(scores)
-    print(labels)
-
     filter_inds = np.where(scores > conf_thres)[0]
     results = [[], [], [], []]
     for i in filter_inds:
