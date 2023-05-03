@@ -1,4 +1,13 @@
 # Detection Detailer
+
+- 와일드카드 오류 수정
+
+- torch2.0+cuda118 대응 (mmdet3.0) 
+
+```
+git clone -b mmdet3 https://github.com/ninjaneural/ddetailer
+```
+
 An object detection and auto-mask extension for [Stable Diffusion web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui). See [Installation](https://github.com/dustysys/ddetailer#installation).
 
 ![adoringfan](/misc/ddetailer_example_1.png)
