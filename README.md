@@ -2,6 +2,12 @@
 
 - 와일드카드 오류 수정
 
+- <= torch1.31+cuda117 
+
+```
+git clone https://github.com/ninjaneural/ddetailer
+```
+
 - torch2.0+cuda118 대응 (mmdet3.0) 
 
 ```
