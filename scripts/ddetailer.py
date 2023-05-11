@@ -214,6 +214,7 @@ class DetectionDetailerScript(scripts.Script):
             p.do_not_save_grid = True
             p.do_not_save_samples = True
         output_images = []
+        infotexts = []
         state.job_count = ddetail_count
         for n in range(ddetail_count):
             devices.torch_gc()
@@ -319,6 +320,7 @@ class DetectionDetailerScript(scripts.Script):
                           processed = processing.process_images(p)
                           p.prompt = p_txt.prompt
                           initial_info = processed.info
+                          infotexts.append(processed.info)
                         else:
                           processed = processing.process_images(p)
                         
@@ -338,7 +340,7 @@ class DetectionDetailerScript(scripts.Script):
         if (initial_info is None):
             initial_info = "No detections found."
 
-        return Processed(p, output_images, seed, initial_info)
+        return Processed(p, output_images, seed, initial_info, infotexts=infotexts)
 
 def modeldataset(model_shortname):
     path = modelpath(model_shortname)
