@@ -1,6 +1,3 @@
-import mmcv
-from mmdet.apis import (inference_detector,
-                        init_detector)
 import os
 import sys
 import cv2
@@ -17,7 +14,6 @@ from modules.paths import models_path
 from basicsr.utils.download_util import load_file_from_url
 
 dd_models_path = os.path.join(models_path, "mmdet")
-
 
 def list_models(model_path):
     model_list = modelloader.load_models(
@@ -82,6 +78,9 @@ def startup():
 
 startup()
 
+import mmcv
+from mmdet.apis import (inference_detector,
+                        init_detector)
 
 def gr_show(visible=True):
     return {"visible": visible, "__type__": "update"}
