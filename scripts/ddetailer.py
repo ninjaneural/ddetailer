@@ -252,9 +252,15 @@ class DetectionDetailerScript(scripts.Script):
                 width=p_txt.width,
                 height=p_txt.height,
                 tiling=p_txt.tiling,
+                extra_generation_params=p_txt.extra_generation_params,
             )
             p.do_not_save_grid = True
             p.do_not_save_samples = True
+            p.cached_c = [None, None]
+            p.cached_uc = [None, None]
+            p.scripts = p_txt.scripts
+            p.script_args = p_txt.script_args
+            
         output_images = []
         state.job_count = ddetail_count
         for n in range(ddetail_count):
@@ -624,7 +630,7 @@ def inference_mmdet_bbox(image, modelname, conf_thres, label):
         return [[], [], [], []]
     bboxes = np.vstack(results.pred_instances.bboxes)
     scores = np.vstack(results.pred_instances.scores)
-    filter_inds = np.where(bboxes[:, -1] > conf_thres)[0]
+    filter_inds = np.where(scores > conf_thres)[0]
     results = [[], [], [], []]
     for i in filter_inds:
         results[0].append(label)
